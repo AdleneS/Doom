@@ -91,27 +91,52 @@ int		main_loop(t_app *e)
 		ttranslated[i]->vert[1].z = trotatedzx[i]->vert[1].z + 3.0f;
 		ttranslated[i]->vert[2].z = trotatedzx[i]->vert[2].z + 3.0f;
 
-		mulitplymatrix(ttranslated[i]->vert[0], &tprojected[i]->vert[0], e->matrix);
-		mulitplymatrix(ttranslated[i]->vert[1], &tprojected[i]->vert[1], e->matrix);
-		mulitplymatrix(ttranslated[i]->vert[2], &tprojected[i]->vert[2], e->matrix);
 
-		tprojected[i]->vert[0].x += 1;
-		tprojected[i]->vert[0].y += 1;
-		tprojected[i]->vert[1].x += 1;
-		tprojected[i]->vert[1].y += 1;
-		tprojected[i]->vert[2].x += 1;
-		tprojected[i]->vert[2].y += 1;
+		t_vertex normal;
+		t_vertex line1;
+		t_vertex line2;
+		double l;
 
-		tprojected[i]->vert[0].x *= 0.5 * WIDTH;
-		tprojected[i]->vert[0].y *= 0.5 * HEIGHT;
-		tprojected[i]->vert[1].x *= 0.5 * WIDTH;
-		tprojected[i]->vert[1].y *= 0.5 * HEIGHT;
-		tprojected[i]->vert[2].x *= 0.5 * WIDTH;
-		tprojected[i]->vert[2].y *= 0.5 * HEIGHT;
-		//printf("%f  ||  ", tprojected[i]->vert[2].x * 10);
-		//printf("%f  ||  ", tprojected[i]->vert[2].y * 10);
-		//printf("%f\n", tprojected[i]->vert[2].z * 10);
-		drawtriangle(e, tprojected[i]);
+		line1.x = ttranslated[i]->vert[1].x - ttranslated[i]->vert[0].x;
+		line1.y = ttranslated[i]->vert[1].y - ttranslated[i]->vert[0].y;
+		line1.z = ttranslated[i]->vert[1].z - ttranslated[i]->vert[0].z;
+
+		line2.x = ttranslated[i]->vert[2].x - ttranslated[i]->vert[0].x;
+		line2.y = ttranslated[i]->vert[2].y - ttranslated[i]->vert[0].y;
+		line2.z = ttranslated[i]->vert[2].z - ttranslated[i]->vert[0].z;
+
+		normal.x = line1.y * line2.z - line1.z * line2.y;
+		normal.y = line1.z * line2.x - line1.x * line2.z;
+		normal.z = line1.x * line2.y - line1.y * line2.x;
+		l = sqrtf(normal.x*normal.x + normal.y*normal.y + normal.z*normal.z);
+		normal.x /= l;
+		normal.y /= l;
+		normal.z /= l;
+
+		if (normal.z < 0)
+		{
+			mulitplymatrix(ttranslated[i]->vert[0], &tprojected[i]->vert[0], e->matrix);
+			mulitplymatrix(ttranslated[i]->vert[1], &tprojected[i]->vert[1], e->matrix);
+			mulitplymatrix(ttranslated[i]->vert[2], &tprojected[i]->vert[2], e->matrix);
+	
+			tprojected[i]->vert[0].x += 1;
+			tprojected[i]->vert[0].y += 1;
+			tprojected[i]->vert[1].x += 1;
+			tprojected[i]->vert[1].y += 1;
+			tprojected[i]->vert[2].x += 1;
+			tprojected[i]->vert[2].y += 1;
+	
+			tprojected[i]->vert[0].x *= 0.5 * WIDTH;
+			tprojected[i]->vert[0].y *= 0.5 * HEIGHT;
+			tprojected[i]->vert[1].x *= 0.5 * WIDTH;
+			tprojected[i]->vert[1].y *= 0.5 * HEIGHT;
+			tprojected[i]->vert[2].x *= 0.5 * WIDTH;
+			tprojected[i]->vert[2].y *= 0.5 * HEIGHT;
+			//printf("%f  ||  ", tprojected[i]->vert[2].x * 10);
+			//printf("%f  ||  ", tprojected[i]->vert[2].y * 10);
+			//printf("%f\n", tprojected[i]->vert[2].z * 10);
+			drawtriangle(e, tprojected[i]);
+		}
 	}
 	i = -1;
 	//patate(e);
