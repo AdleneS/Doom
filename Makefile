@@ -1,6 +1,6 @@
 
 NAME	= doom
-SRCS 	= main.c mlx_tools.c hooks.c utility.c mouse.c mesh.c
+SRCS 	= main.c mlx_tools.c hooks.c utility.c mouse.c mesh.c opp.c matrix.c
 
 OBJ_DIR = ./.objs
 SRC_DIR = ./srcs

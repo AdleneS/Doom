@@ -20,13 +20,13 @@
 static void	keys_handle(t_app *e, int key, short int value)
 {
 	if (key == K_W)
-		e->test += 0.5;
+		e->test += 0.2;
 	if (key == K_S)
-		e->key.down = value;
+		e->test  -= 0.2;
 	if (key == K_D)
-		e->key.right = value;
+		e->test  += 0.2;
 	if (key == K_A)
-		e->key.left = value;
+		e->test  -= 0.2;
 	if (key == K_SPACE)
 		e->key.jump = value;
 }

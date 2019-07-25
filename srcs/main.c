@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:11:07 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/06/03 16:45:28 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/07/25 20:44:49 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -22,120 +22,85 @@ int		main_loop(t_app *e)
 	int i;
 
 	i = -1;
-	t_tri	**ttranslated;
-	t_tri	**tprojected;
-	t_tri	**trotatedzx;
-	t_tri	**trotatedz;
-	t_matrix matRotZ;
-	t_matrix matRotX;
-	int o;
-	int p;
-	o = -1;
-	while (++o < 4)
-	{
-		p = -1;
-		while (++p < 4)
-			matRotZ.m[o][p] = 0;
-	}
-	o = -1;
-	while (++o < 4)
-	{
-		p = -1;
-		while (++p < 4)
-			matRotX.m[o][p] = 0;
-	}
-	matRotZ.m[0][0] = cosf(e->test);
-	matRotZ.m[0][1] = sinf(e->test);
-	matRotZ.m[1][0] = -sinf(e->test);
-	matRotZ.m[1][1] = cosf(e->test);
-	matRotZ.m[2][2] = 1;
-	matRotZ.m[3][3] = 1;
+	t_tri	**t_projected;
+	t_tri	**t_transformed;
+	
+	t_projected = malloc(sizeof(t_tri *) * 12);
+	t_transformed = malloc(sizeof(t_tri *) * 12);
+	initMatrix_X(e);
+	initMatrix_Y(e);
+	initMatrix_Z(e);
 
-	matRotX.m[0][0] = 1;
-	matRotX.m[1][1] = cosf(e->test * 1);
-	matRotX.m[1][2] = sinf(e->test * 1);
-	matRotX.m[2][1] = -sinf(e->test* 1);
-	matRotX.m[2][2] = cosf(e->test * 1);
-	matRotX.m[3][3] = 1;
-
-
-	e->test+=0.01;
-	tprojected = malloc(sizeof(t_tri *) * 12);
-	trotatedzx = malloc(sizeof(t_tri *) * 12);
-	trotatedz = malloc(sizeof(t_tri *) * 12);
-	ttranslated = malloc(sizeof(t_tri *) * 12);
+	//printf("X: %f  ||  ", e->matRotX.m[1][1]);
+	//printf("Y: %f  ||  ", e->matRotY.m[1][1]);
+	//printf("Z: %f\n", e->matRotZ.m[1][1]);
+	e->test += 0.005;
+	e->m_trans = matrix_translation(0.0, 0.0, 2.0);
+	matrix_identity(&e->m_world);
+	e->m_world = matrix_mulMatrix(e->matRotZ, e->matRotX);
+	e->m_world = matrix_mulMatrix(e->m_world, e->m_trans);
 	
 	while (++i < 12)
 	{
-		tprojected[i] = malloc(sizeof(t_tri));
-		ttranslated[i] = malloc(sizeof(t_tri));
-		trotatedzx[i] = malloc(sizeof(t_tri));
-		trotatedz[i] = malloc(sizeof(t_tri));
-		mulitplymatrix(e->mesh->tri[i].vert[0], &trotatedz[i]->vert[0], &matRotZ);
-		mulitplymatrix(e->mesh->tri[i].vert[1], &trotatedz[i]->vert[1], &matRotZ);
-		mulitplymatrix(e->mesh->tri[i].vert[2], &trotatedz[i]->vert[2], &matRotZ);
-		//mulitplymatrix(e->mesh->tri[i].vert[0], &tprojected[i]->vert[0], e->matrix);
-		//mulitplymatrix(e->mesh->tri[i].vert[1], &tprojected[i]->vert[1], e->matrix);
-		//mulitplymatrix(e->mesh->tri[i].vert[2], &tprojected[i]->vert[2], e->matrix);
-		//printf("%f\n", tprojected[i]->vert[0]);
-		//printf("%f\n",e->mesh->tri[i].vert[0].x);
-	
-		mulitplymatrix(trotatedz[i]->vert[0], &trotatedzx[i]->vert[0], &matRotX);
-		mulitplymatrix(trotatedz[i]->vert[1], &trotatedzx[i]->vert[1], &matRotX);
-		mulitplymatrix(trotatedz[i]->vert[2], &trotatedzx[i]->vert[2], &matRotX);
+		t_projected[i] = malloc(sizeof(t_tri));
+		t_transformed[i] = malloc(sizeof(t_tri));
 
-		*ttranslated[i] = *trotatedzx[i];
-
-		//printf("%f\n", trotatedzx[i]->vert[1].y);
-		ttranslated[i]->vert[0].z = trotatedzx[i]->vert[0].z + 3.0f;
-		ttranslated[i]->vert[1].z = trotatedzx[i]->vert[1].z + 3.0f;
-		ttranslated[i]->vert[2].z = trotatedzx[i]->vert[2].z + 3.0f;
-
+		t_transformed[i]->vert[0] = matrix_mulvector(e->m_world, e->mesh->tri[i].vert[0]);
+		t_transformed[i]->vert[1] = matrix_mulvector(e->m_world, e->mesh->tri[i].vert[1]);
+		t_transformed[i]->vert[2] = matrix_mulvector(e->m_world, e->mesh->tri[i].vert[2]);
 
 		t_vertex normal;
 		t_vertex line1;
 		t_vertex line2;
 		double l;
 
-		line1.x = ttranslated[i]->vert[1].x - ttranslated[i]->vert[0].x;
-		line1.y = ttranslated[i]->vert[1].y - ttranslated[i]->vert[0].y;
-		line1.z = ttranslated[i]->vert[1].z - ttranslated[i]->vert[0].z;
-
-		line2.x = ttranslated[i]->vert[2].x - ttranslated[i]->vert[0].x;
-		line2.y = ttranslated[i]->vert[2].y - ttranslated[i]->vert[0].y;
-		line2.z = ttranslated[i]->vert[2].z - ttranslated[i]->vert[0].z;
-
-		normal.x = line1.y * line2.z - line1.z * line2.y;
-		normal.y = line1.z * line2.x - line1.x * line2.z;
-		normal.z = line1.x * line2.y - line1.y * line2.x;
+		line1 = v_sub(t_transformed[i]->vert[1], t_transformed[i]->vert[0]);
+		line2 = v_sub(t_transformed[i]->vert[2], t_transformed[i]->vert[0]);
+		normal = v_crossprod(line1, line2);
+		normal = v_normalize(normal);
 		l = sqrtf(normal.x*normal.x + normal.y*normal.y + normal.z*normal.z);
 		normal.x /= l;
 		normal.y /= l;
 		normal.z /= l;
+		normal.w = 1;
 
-		if (normal.z < 0)
+		e->v_camray = v_sub(t_transformed[i]->vert[0], e->vcamera);
+
+		//if (normal.z < 0)
+		if (v_dotproduct(normal, e->v_camray) < 0.0)
 		{
-			mulitplymatrix(ttranslated[i]->vert[0], &tprojected[i]->vert[0], e->matrix);
-			mulitplymatrix(ttranslated[i]->vert[1], &tprojected[i]->vert[1], e->matrix);
-			mulitplymatrix(ttranslated[i]->vert[2], &tprojected[i]->vert[2], e->matrix);
-	
-			tprojected[i]->vert[0].x += 1;
-			tprojected[i]->vert[0].y += 1;
-			tprojected[i]->vert[1].x += 1;
-			tprojected[i]->vert[1].y += 1;
-			tprojected[i]->vert[2].x += 1;
-			tprojected[i]->vert[2].y += 1;
-	
-			tprojected[i]->vert[0].x *= 0.5 * WIDTH;
-			tprojected[i]->vert[0].y *= 0.5 * HEIGHT;
-			tprojected[i]->vert[1].x *= 0.5 * WIDTH;
-			tprojected[i]->vert[1].y *= 0.5 * HEIGHT;
-			tprojected[i]->vert[2].x *= 0.5 * WIDTH;
-			tprojected[i]->vert[2].y *= 0.5 * HEIGHT;
-			//printf("%f  ||  ", tprojected[i]->vert[2].x * 10);
-			//printf("%f  ||  ", tprojected[i]->vert[2].y * 10);
-			//printf("%f\n", tprojected[i]->vert[2].z * 10);
-			drawtriangle(e, tprojected[i]);
+			t_projected[i]->vert[0] = matrix_mulvector(e->matProj, t_transformed[i]->vert[0]);
+			t_projected[i]->vert[1] = matrix_mulvector(e->matProj, t_transformed[i]->vert[1]);
+			t_projected[i]->vert[2] = matrix_mulvector(e->matProj, t_transformed[i]->vert[2]);
+
+			//printf("%f  ||  ", e->matProj.m[0][0]);
+			//printf("%f  ||  ", e->matProj.m[1][1]);
+			//printf("%f  ||  ", e->matProj.m[2][2]);
+			//printf("%f  ||  ", e->matProj.m[3][2]);
+			//printf("%f\n\n", e->matProj.m[2][3]);
+
+			t_projected[i]->vert[0] = v_div(t_projected[i]->vert[0], t_projected[i]->vert[0].w);
+			t_projected[i]->vert[1] = v_div(t_projected[i]->vert[1], t_projected[i]->vert[1].w);
+			t_projected[i]->vert[2] = v_div(t_projected[i]->vert[2], t_projected[i]->vert[2].w);
+			
+			//printf("%f  ||  ", t_projected[i]->vert[1].x);
+			//printf("%f  ||  \n\n", t_projected[i]->vert[2].x);
+
+			t_vertex	v_offsetview;
+
+			v_offsetview = (t_vertex){1.0, 1.0, 0, 1.0};
+
+			t_projected[i]->vert[0] = v_add(t_projected[i]->vert[0], v_offsetview);
+			t_projected[i]->vert[1] = v_add(t_projected[i]->vert[1], v_offsetview);
+			t_projected[i]->vert[2] = v_add(t_projected[i]->vert[2], v_offsetview);
+
+			t_projected[i]->vert[0].x *= 0.5 * WIDTH;
+			t_projected[i]->vert[0].y *= 0.5 * HEIGHT;
+			t_projected[i]->vert[1].x *= 0.5 * WIDTH;
+			t_projected[i]->vert[1].y *= 0.5 * HEIGHT;
+			t_projected[i]->vert[2].x *= 0.5 * WIDTH;
+			t_projected[i]->vert[2].y *= 0.5 * HEIGHT;
+			drawtriangle(e, t_projected[i]);
 		}
 	}
 	i = -1;
@@ -151,12 +116,9 @@ int		main_loop(t_app *e)
 
 void	drawtriangle(t_app *e, t_tri *t)
 {
-	_trace(e, t->vert[0].x, t->vert[0].y, t->vert[1].x, t->vert[1].y, (t_rgba){255, 255, 255 ,0});
-	_trace(e, t->vert[1].x, t->vert[1].y, t->vert[2].x, t->vert[2].y, (t_rgba){255, 255, 255 ,0});
-	_trace(e, t->vert[2].x, t->vert[2].y, t->vert[0].x, t->vert[0].y, (t_rgba){255, 255, 255 ,0});
-	//printf("%f  ||  ", t->vert[0].x);
-	//printf("%f  ||  ", t->vert[0].y);
-	//printf("%f\n", t->vert[0].z);
+	_trace(e, t->vert[0].x, t->vert[0].y, t->vert[1].x, t->vert[1].y, (t_rgba){255, 0, 255 ,0});
+	_trace(e, t->vert[1].x, t->vert[1].y, t->vert[2].x, t->vert[2].y, (t_rgba){255, 0, 255 ,0});
+	_trace(e, t->vert[2].x, t->vert[2].y, t->vert[0].x, t->vert[0].y, (t_rgba){255, 0, 255 ,0});
 }
 
 void	main_init(t_app *e)
@@ -170,8 +132,27 @@ void	main_init(t_app *e)
 	e->key.jump = 0;
 	e->mouse.y = 0;
 	e->mouse.x = 0;
-
+	e->vcamera.x = 0;
+	e->vcamera.y = 0;
+	e->vcamera.z = 0;
+	e->vcamera.w = 1;
 	e->sector = (struct sector **)malloc(sizeof(struct sector*) * 3);
+	e->fnear = 0.1;
+	e->ffar = 1000.0;
+	e->ffov = 90.0;
+	e->faspectratio = (double)HEIGHT / WIDTH;
+	e->ffovrad = 1.0 / tanf(e->ffov * 0.5 / 180 * 3.14159);
+	e->v_camray.x = 0;
+	e->v_camray.y = 0;
+	e->v_camray.z = 0;
+	e->v_camray.w = 0;
+	//e->m_world = matrix_identity();
+	set_matrix(&e->matRotX);
+	set_matrix(&e->matRotY);
+	set_matrix(&e->matRotZ);
+	set_matrix(&e->m_world);
+	init_matrix_proj(e);
+
 }
 
 static void	load_texture_from_file(t_app *e, int i, char *file)
@@ -217,9 +198,7 @@ int		main(int argc, char *argv[])
 	e->test = 0;
 	main_init(e);
 	createcube(e);
-	fmatrix(e);
 	lmlx_init(e);
-	//printf("%f\n", e->matrix->m[3][2]);
 	//load_textures(e);
 	lmlx_loop(e);
 	return (0);

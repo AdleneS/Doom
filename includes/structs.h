@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/06/03 14:18:19 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/07/23 19:24:41 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -27,6 +27,7 @@ typedef struct			s_vertex
 	double				x;
 	double				y;
 	double				z;
+	double				w;
 }						t_vertex;
 
 typedef struct			s_tri
@@ -65,6 +66,12 @@ typedef struct			s_keypress
 	short int			jump;
 }						t_keypress;
 
+typedef struct			s_input
+{
+	double				rotx;
+	double				roty;
+	double				rotz;
+}						t_input;
 
 typedef struct			s_mouse
 {
@@ -83,8 +90,22 @@ typedef struct			s_app
 	struct s_mesh		*mesh;
 	struct s_t			*doom;
 	struct s_sprite		*sp;
+	struct s_input		*input;
 	struct sector		**sector;
 	struct s_mlx		**tex;
+	struct s_vertex		vcamera;
+	struct s_vertex		v_camray;
+	struct s_matrix		m_trans;
+	struct s_matrix		m_world;
+	struct s_matrix 	matRotX;
+	struct s_matrix 	matRotY;
+	struct s_matrix 	matRotZ;
+	struct s_matrix 	matProj;
+	double fnear;
+	double ffar;
+	double ffov;
+	double faspectratio;
+	double ffovrad;
 	short int			currentsector;
 	short int			pause;
 	double				test;

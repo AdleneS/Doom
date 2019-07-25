@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/06/03 14:52:39 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/07/25 18:56:20 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -22,27 +22,44 @@
 # include <math.h>
 # include <sys/stat.h>
 
-void	lmlx_init(t_app *e);
-void	lmlx_putpixel(t_app *e, int x, int y, t_rgba c);
-void	lmlx_loop(t_app *e);
-void	lmlx_clearimg(t_app *e);
+void			lmlx_init(t_app *e);
+void			lmlx_putpixel(t_app *e, int x, int y, t_rgba c);
+void			lmlx_loop(t_app *e);
+void			lmlx_clearimg(t_app *e);
 
-int		main_loop(t_app *e);
+int				main_loop(t_app *e);
 
-void	hook_keys(t_app *e);
-int		keyhook_press(int k, t_app *e);
-int		keyhook_release(int k, t_app *e);
+void			hook_keys(t_app *e);
+int				keyhook_press(int k, t_app *e);
+int				keyhook_release(int k, t_app *e);
 
-double		min(double a, double b);
-double		max(double a, double b);
-double		clamp(double a, double mi, double ma);
+double			min(double a, double b);
+double			max(double a, double b);
+double			clamp(double a, double mi, double ma);
 
-int		mouse_move(int x, int y, t_app *e);
+int				mouse_move(int x, int y, t_app *e);
 
-void	_trace(t_app *e, int x0, int y0, int x1, int y1, t_rgba c);
-void	createcube(t_app *e);
-void	fmatrix(t_app *e);
-void	mulitplymatrix(t_vertex i, t_vertex *o, t_matrix *matrix);
-void	drawtriangle(t_app *e, t_tri *t);
+void			_trace(t_app *e, int x0, int y0, int x1, int y1, t_rgba c);
+void			createcube(t_app *e);
+void			mulitplymatrix(t_vertex i, t_vertex *o, t_matrix *matrix);
+void			drawtriangle(t_app *e, t_tri *t);
+void			initMatrix_X(t_app *e);
+void			initMatrix_Y(t_app *e);
+void			initMatrix_Z(t_app *e);
+void			init_matrix_proj(t_app *e);
+t_vertex		matrix_mulvector(t_matrix m, t_vertex i);
+t_matrix		matrix_mulMatrix(t_matrix m1, t_matrix m2);
+t_matrix		matrix_translation(double x, double y, double z);
+void			matrix_identity(t_matrix *mat);
+t_vertex		v_add(t_vertex v1, t_vertex v2);
+t_vertex		v_sub(t_vertex v1, t_vertex v2);
+t_vertex		v_mul(t_vertex v1, double k);
+t_vertex		v_div(t_vertex v1, double k);
+t_vertex		v_normalize(t_vertex v);
+t_vertex		v_crossprod(t_vertex v1, t_vertex v2);
+void			set_matrix(t_matrix *matrix);
+double			v_length(t_vertex v);
+double			v_dotproduct(t_vertex v1, t_vertex v2);
+
 
 #endif
