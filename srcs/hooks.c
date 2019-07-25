@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:39:09 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/05/28 14:10:39 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/07/25 22:20:13 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -20,13 +20,18 @@
 static void	keys_handle(t_app *e, int key, short int value)
 {
 	if (key == K_W)
-		e->test += 0.2;
+		e->vcamera.y += 0.10;
 	if (key == K_S)
-		e->test  -= 0.2;
+		e->vcamera.y -= 0.10;
 	if (key == K_D)
-		e->test  += 0.2;
+		e->vcamera.x += 0.10;
 	if (key == K_A)
-		e->test  -= 0.2;
+		e->vcamera.x -= 0.10;
+	if (key == K_Q)
+		e->vcamera.z += 0.10;
+	if (key == K_E)
+		e->vcamera.z -= 0.10;
+
 	if (key == K_SPACE)
 		e->key.jump = value;
 }

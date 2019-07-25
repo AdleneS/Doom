@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/07/23 19:24:41 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/07/25 21:25:57 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -94,6 +94,7 @@ typedef struct			s_app
 	struct sector		**sector;
 	struct s_mlx		**tex;
 	struct s_vertex		vcamera;
+	struct s_vertex		vlookdir;
 	struct s_vertex		v_camray;
 	struct s_matrix		m_trans;
 	struct s_matrix		m_world;

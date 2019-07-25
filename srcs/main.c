@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:11:07 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/07/25 20:44:49 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/07/25 22:02:49 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -24,9 +24,11 @@ int		main_loop(t_app *e)
 	i = -1;
 	t_tri	**t_projected;
 	t_tri	**t_transformed;
+	t_tri	**t_viewed;
 	
 	t_projected = malloc(sizeof(t_tri *) * 12);
 	t_transformed = malloc(sizeof(t_tri *) * 12);
+	t_viewed = malloc(sizeof(t_tri *) * 12);
 	initMatrix_X(e);
 	initMatrix_Y(e);
 	initMatrix_Z(e);
@@ -34,16 +36,27 @@ int		main_loop(t_app *e)
 	//printf("X: %f  ||  ", e->matRotX.m[1][1]);
 	//printf("Y: %f  ||  ", e->matRotY.m[1][1]);
 	//printf("Z: %f\n", e->matRotZ.m[1][1]);
-	e->test += 0.005;
+	//e->test += 0.005;
 	e->m_trans = matrix_translation(0.0, 0.0, 2.0);
 	matrix_identity(&e->m_world);
 	e->m_world = matrix_mulMatrix(e->matRotZ, e->matRotX);
 	e->m_world = matrix_mulMatrix(e->m_world, e->m_trans);
 	
+	t_vertex vUp;
+	t_vertex vTarget;
+	t_matrix matCamera;
+	t_matrix matView;
+	
+	e->vlookdir = (t_vertex){0, 0 , 1, 1};
+	vUp = (t_vertex){0, 1, 0, 1};
+	vTarget = v_add(e->vcamera, e->vlookdir);
+	matCamera = m_pointAt(e->vcamera, vTarget, vUp);
+	matView = m_quickInverse(matCamera);
 	while (++i < 12)
 	{
 		t_projected[i] = malloc(sizeof(t_tri));
 		t_transformed[i] = malloc(sizeof(t_tri));
+		t_viewed[i] = malloc(sizeof(t_tri));
 
 		t_transformed[i]->vert[0] = matrix_mulvector(e->m_world, e->mesh->tri[i].vert[0]);
 		t_transformed[i]->vert[1] = matrix_mulvector(e->m_world, e->mesh->tri[i].vert[1]);
@@ -69,9 +82,13 @@ int		main_loop(t_app *e)
 		//if (normal.z < 0)
 		if (v_dotproduct(normal, e->v_camray) < 0.0)
 		{
-			t_projected[i]->vert[0] = matrix_mulvector(e->matProj, t_transformed[i]->vert[0]);
-			t_projected[i]->vert[1] = matrix_mulvector(e->matProj, t_transformed[i]->vert[1]);
-			t_projected[i]->vert[2] = matrix_mulvector(e->matProj, t_transformed[i]->vert[2]);
+			t_viewed[i]->vert[0] = matrix_mulvector(matView, t_transformed[i]->vert[0]);
+			t_viewed[i]->vert[1] = matrix_mulvector(matView, t_transformed[i]->vert[1]);
+			t_viewed[i]->vert[2] = matrix_mulvector(matView, t_transformed[i]->vert[2]);
+
+			t_projected[i]->vert[0] = matrix_mulvector(e->matProj, t_viewed[i]->vert[0]);
+			t_projected[i]->vert[1] = matrix_mulvector(e->matProj, t_viewed[i]->vert[1]);
+			t_projected[i]->vert[2] = matrix_mulvector(e->matProj, t_viewed[i]->vert[2]);
 
 			//printf("%f  ||  ", e->matProj.m[0][0]);
 			//printf("%f  ||  ", e->matProj.m[1][1]);
@@ -116,9 +133,9 @@ int		main_loop(t_app *e)
 
 void	drawtriangle(t_app *e, t_tri *t)
 {
-	_trace(e, t->vert[0].x, t->vert[0].y, t->vert[1].x, t->vert[1].y, (t_rgba){255, 0, 255 ,0});
-	_trace(e, t->vert[1].x, t->vert[1].y, t->vert[2].x, t->vert[2].y, (t_rgba){255, 0, 255 ,0});
-	_trace(e, t->vert[2].x, t->vert[2].y, t->vert[0].x, t->vert[0].y, (t_rgba){255, 0, 255 ,0});
+	_trace(e, t->vert[0].x, t->vert[0].y, t->vert[1].x, t->vert[1].y, (t_rgba){255, 255, 255 ,0});
+	_trace(e, t->vert[1].x, t->vert[1].y, t->vert[2].x, t->vert[2].y, (t_rgba){255, 255, 255 ,0});
+	_trace(e, t->vert[2].x, t->vert[2].y, t->vert[0].x, t->vert[0].y, (t_rgba){255, 255, 255 ,0});
 }
 
 void	main_init(t_app *e)
@@ -132,20 +149,15 @@ void	main_init(t_app *e)
 	e->key.jump = 0;
 	e->mouse.y = 0;
 	e->mouse.x = 0;
-	e->vcamera.x = 0;
-	e->vcamera.y = 0;
-	e->vcamera.z = 0;
-	e->vcamera.w = 1;
+	e->vcamera = (t_vertex){0, 0, 0, 1};
+	e->vlookdir = (t_vertex){0, 0, 0, 1};
+	e->v_camray = (t_vertex){0, 0, 0, 1};
 	e->sector = (struct sector **)malloc(sizeof(struct sector*) * 3);
 	e->fnear = 0.1;
 	e->ffar = 1000.0;
-	e->ffov = 90.0;
+	e->ffov = 60.0;
 	e->faspectratio = (double)HEIGHT / WIDTH;
 	e->ffovrad = 1.0 / tanf(e->ffov * 0.5 / 180 * 3.14159);
-	e->v_camray.x = 0;
-	e->v_camray.y = 0;
-	e->v_camray.z = 0;
-	e->v_camray.w = 0;
 	//e->m_world = matrix_identity();
 	set_matrix(&e->matRotX);
 	set_matrix(&e->matRotY);

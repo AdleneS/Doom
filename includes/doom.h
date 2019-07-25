@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/07/25 18:56:20 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/07/25 21:29:09 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -60,6 +60,9 @@ t_vertex		v_crossprod(t_vertex v1, t_vertex v2);
 void			set_matrix(t_matrix *matrix);
 double			v_length(t_vertex v);
 double			v_dotproduct(t_vertex v1, t_vertex v2);
+t_matrix		m_pointAt(t_vertex pos, t_vertex target, t_vertex up);
+t_matrix		m_quickInverse(t_matrix m);
+
 
 
 #endif

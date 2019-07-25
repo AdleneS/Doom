@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/07/22 18:46:24 by asaba        #+#   ##    ##    #+#       */
-/*   Updated: 2019/07/25 20:29:47 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/07/25 21:24:30 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -158,3 +158,39 @@ void		matrix_identity(t_matrix *mat)
 	//return (m);
 }
 
+t_matrix		m_pointAt(t_vertex pos, t_vertex target, t_vertex up)
+{
+	t_vertex newForward;
+	t_vertex newRight;
+	t_vertex newUp;
+	t_vertex a;
+	t_matrix m;
+
+	newForward = v_sub(target, pos);
+	newForward = v_normalize(newForward);
+
+	a = v_mul(newForward, v_dotproduct(up, newForward));
+	newUp = v_sub(up, a);
+	newUp = v_normalize(newUp);
+	
+	newRight = v_crossprod(newUp, newForward);
+
+	m.m[0][0] = newRight.x;		m.m[0][1] = newRight.y;		m.m[0][2] = newRight.z;		m.m[0][3] = 0.0f;
+	m.m[1][0] = newUp.x;		m.m[1][1] = newUp.y;		m.m[1][2] = newUp.z;		m.m[1][3] = 0.0f;
+	m.m[2][0] = newForward.x;	m.m[2][1] = newForward.y;	m.m[2][2] = newForward.z;	m.m[2][3] = 0.0f;
+	m.m[3][0] = pos.x;			m.m[3][1] = pos.y;			m.m[3][2] = pos.z;			m.m[3][3] = 1.0f;
+	return m;
+}
+
+t_matrix	m_quickInverse(t_matrix m)
+	{
+		t_matrix matrix;
+		matrix.m[0][0] = m.m[0][0]; matrix.m[0][1] = m.m[1][0]; matrix.m[0][2] = m.m[2][0]; matrix.m[0][3] = 0.0f;
+		matrix.m[1][0] = m.m[0][1]; matrix.m[1][1] = m.m[1][1]; matrix.m[1][2] = m.m[2][1]; matrix.m[1][3] = 0.0f;
+		matrix.m[2][0] = m.m[0][2]; matrix.m[2][1] = m.m[1][2]; matrix.m[2][2] = m.m[2][2]; matrix.m[2][3] = 0.0f;
+		matrix.m[3][0] = -(m.m[3][0] * matrix.m[0][0] + m.m[3][1] * matrix.m[1][0] + m.m[3][2] * matrix.m[2][0]);
+		matrix.m[3][1] = -(m.m[3][0] * matrix.m[0][1] + m.m[3][1] * matrix.m[1][1] + m.m[3][2] * matrix.m[2][1]);
+		matrix.m[3][2] = -(m.m[3][0] * matrix.m[0][2] + m.m[3][1] * matrix.m[1][2] + m.m[3][2] * matrix.m[2][2]);
+		matrix.m[3][3] = 1.0f;
+		return matrix;
+}
