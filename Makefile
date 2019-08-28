@@ -9,7 +9,7 @@ INC_HDR = -I./mlx -I./libft -I./
 INC_LIB = -L./libft -lft -L./mlx -lmlx -framework OpenGL -framework AppKit 
 INC_H	= includes/doom.h includes/structs.h includes/defines.h libft/libft.a
 
-CFLAGS	:= -Wall -Wextra -g -ggdb3 -O3 -I$(INC_DIR)
+CFLAGS	:= -Wall -Wextra -g -ggdb3 -O3 -fsanitize=address -I$(INC_DIR)
 OBJS	:= $(patsubst %.c,$(OBJ_DIR)/%.o,  $(SRCS))
 
 all: CREATE_OBJDIR FT_MAKELIB $(NAME)

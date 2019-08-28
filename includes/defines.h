@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/05/29 20:08:13 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/08/26 12:38:43 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -28,6 +28,10 @@
 # define K_E 14
 # define K_SPACE 49
 # define K_ESC 53
+# define K_LEFT 123
+# define K_RIGHT 124
+# define K_DOWN 125
+# define K_UP 126
 
 
 #define MIN(a,b)				(((a) < (b)) ? (a) : (b))

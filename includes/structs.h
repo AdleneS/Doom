@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/07/25 21:25:57 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/08/28 14:50:39 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -21,6 +21,7 @@ typedef struct			s_rgba
 	int					b;
 	int					a;
 }						t_rgba;
+
 
 typedef struct			s_vertex
 {	
@@ -44,6 +45,13 @@ typedef struct			s_matrix
 {
 	double				m[4][4];
 }						t_matrix;
+
+typedef struct			s_sortedtri
+{	
+	t_tri				sortedtri;
+	struct s_sortedtri	*next;
+
+}						t_sortedtri;
 
 typedef struct			s_mlx
 {
@@ -93,20 +101,23 @@ typedef struct			s_app
 	struct s_input		*input;
 	struct sector		**sector;
 	struct s_mlx		**tex;
+	struct s_sortedtri	*sortedtri;
 	struct s_vertex		vcamera;
 	struct s_vertex		vlookdir;
 	struct s_vertex		v_camray;
 	struct s_matrix		m_trans;
 	struct s_matrix		m_world;
+	struct s_matrix 	matRotCamera;
 	struct s_matrix 	matRotX;
 	struct s_matrix 	matRotY;
 	struct s_matrix 	matRotZ;
 	struct s_matrix 	matProj;
-	double fnear;
-	double ffar;
-	double ffov;
-	double faspectratio;
-	double ffovrad;
+	double				fYaw;
+	double				fnear;
+	double				ffar;
+	double				ffov;
+	double				faspectratio;
+	double				ffovrad;
 	short int			currentsector;
 	short int			pause;
 	double				test;

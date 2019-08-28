@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/07/25 21:29:09 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/08/28 15:50:37 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -38,11 +38,11 @@ double			max(double a, double b);
 double			clamp(double a, double mi, double ma);
 
 int				mouse_move(int x, int y, t_app *e);
+int		drawtriangle(t_app *e, t_sortedtri *s);
 
 void			_trace(t_app *e, int x0, int y0, int x1, int y1, t_rgba c);
 void			createcube(t_app *e);
 void			mulitplymatrix(t_vertex i, t_vertex *o, t_matrix *matrix);
-void			drawtriangle(t_app *e, t_tri *t);
 void			initMatrix_X(t_app *e);
 void			initMatrix_Y(t_app *e);
 void			initMatrix_Z(t_app *e);
@@ -62,6 +62,9 @@ double			v_length(t_vertex v);
 double			v_dotproduct(t_vertex v1, t_vertex v2);
 t_matrix		m_pointAt(t_vertex pos, t_vertex target, t_vertex up);
 t_matrix		m_quickInverse(t_matrix m);
+void			initMatrixCameraRot(t_app *e);
+int				t_clipplane(t_vertex plane_p, t_vertex plane_n, t_tri in_tri, t_tri *out_tri1, t_tri *out_tri2);
+void			triangle(t_app *e, t_vertex t0, t_vertex t1, t_vertex t2, t_rgba color);
 
 
 

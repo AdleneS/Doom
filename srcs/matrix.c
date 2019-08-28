@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/07/22 18:46:24 by asaba        #+#   ##    ##    #+#       */
-/*   Updated: 2019/07/25 21:24:30 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/08/26 12:58:51 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -27,15 +27,6 @@ void	set_matrix(t_matrix *matrix)
 }
 void	initMatrix_X(t_app *e)
 {
-	//int o;
-	//int p;
-	//o = -1;
-	//while (++o < 4)
-	//{
-	//	p = -1;
-	//	while (++p < 4)
-	//		e->matRotX.m[o][p] = 0.0;
-	//}
 	e->matRotX.m[0][0] = 1.0;
 	e->matRotX.m[1][1] = cosf(e->test);
 	e->matRotX.m[1][2] = sinf(e->test);
@@ -46,15 +37,6 @@ void	initMatrix_X(t_app *e)
 
 void	initMatrix_Y(t_app *e)
 {
-	//int o;
-	//int p;
-	//o = -1;
-	//while (++o < 4)
-	//{
-	//	p = -1;
-	//	while (++p < 4)
-	//		e->matRotY.m[o][p] = 0.0;
-	//}
 	e->matRotY.m[0][0] = cosf(e->test);
 	e->matRotY.m[0][2] = sinf(e->test);
 	e->matRotY.m[2][0] = -sinf(e->test);
@@ -63,17 +45,18 @@ void	initMatrix_Y(t_app *e)
 	e->matRotY.m[3][3] = 1.0;
 }
 
+void	initMatrixCameraRot(t_app *e)
+{
+	e->matRotCamera.m[0][0] = cosf(e->fYaw);
+	e->matRotCamera.m[0][2] = sinf(e->fYaw);
+	e->matRotCamera.m[2][0] = -sinf(e->fYaw);
+	e->matRotCamera.m[1][1] = 1.0;
+	e->matRotCamera.m[2][2] = cosf(e->fYaw);
+	e->matRotCamera.m[3][3] = 1.0;
+}
+
 void	initMatrix_Z(t_app *e)
 {
-	//int o;
-	//int p;
-	//o = -1.0;
-	//while (++o < 4)
-	//{
-	//	p = -1;
-	//	while (++p < 4)
-	//		e->matRotZ.m[o][p] = 0.0;
-	//}
 	e->matRotZ.m[0][0] = cosf(e->test);
 	e->matRotZ.m[0][1] = sinf(e->test);
 	e->matRotZ.m[1][0] = -sinf(e->test);
@@ -141,21 +124,10 @@ t_matrix		matrix_mulMatrix(t_matrix m1, t_matrix m2)
 
 void		matrix_identity(t_matrix *mat)
 {
-	//t_matrix	m;
-	//int i;
-	//int j;
-	//i = -1;
-	//while (++i < 4)
-	//{
-	//	j = -1;
-	//	while (++j < 4)
-	//		e->m_world.m[i][j] = 0.0;
-	//}
 	mat->m[0][0] = 1.0f;
 	mat->m[1][1] = 1.0f;
 	mat->m[2][2] = 1.0f;
 	mat->m[3][3] = 1.0f;
-	//return (m);
 }
 
 t_matrix		m_pointAt(t_vertex pos, t_vertex target, t_vertex up)

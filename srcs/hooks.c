@@ -6,31 +6,34 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:39:09 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/07/25 22:20:13 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/08/28 14:41:36 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
 
 #include "../includes/doom.h"
 
-/*
-** udpate struct depending on which key the user press/release
-*/
-
 static void	keys_handle(t_app *e, int key, short int value)
 {
-	if (key == K_W)
+	t_vertex	vForward = v_mul(e->vlookdir, 0.10);
+	
+	if (key == K_UP)
 		e->vcamera.y += 0.10;
-	if (key == K_S)
+	if (key == K_DOWN)
 		e->vcamera.y -= 0.10;
-	if (key == K_D)
+	if (key == K_RIGHT)
 		e->vcamera.x += 0.10;
-	if (key == K_A)
+	if (key == K_LEFT)
 		e->vcamera.x -= 0.10;
-	if (key == K_Q)
-		e->vcamera.z += 0.10;
-	if (key == K_E)
-		e->vcamera.z -= 0.10;
+		
+	if (key == K_W)
+		e->vcamera = v_add(e->vcamera, vForward);
+	if (key == K_S)
+		e->vcamera = v_sub(e->vcamera, vForward);
+	if (key == K_A)
+		e->fYaw += 0.10;
+	if (key == K_D)
+		e->fYaw -= 0.10;
 
 	if (key == K_SPACE)
 		e->key.jump = value;
