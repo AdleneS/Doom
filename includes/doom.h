@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/08/28 15:50:37 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/08/28 18:00:48 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -38,7 +38,8 @@ double			max(double a, double b);
 double			clamp(double a, double mi, double ma);
 
 int				mouse_move(int x, int y, t_app *e);
-int		drawtriangle(t_app *e, t_sortedtri *s);
+int				drawtriangle(t_app *e, t_listtri *s);
+int				draw(t_app *e, t_listtri *s);
 
 void			_trace(t_app *e, int x0, int y0, int x1, int y1, t_rgba c);
 void			createcube(t_app *e);

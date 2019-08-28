@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:11:07 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/08/28 16:02:27 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/08/28 19:09:54 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -14,13 +14,13 @@
 #include "../includes/doom.h"
 #include <stdio.h>
 
-void	pushback(t_sortedtri **list, t_tri tri)
+void	pushback(t_listtri **list, t_tri tri)
 {
-	t_sortedtri *tmp;
-	t_sortedtri *new;
+	t_listtri *tmp;
+	t_listtri *new;
 
-	new = malloc(sizeof(t_sortedtri));
-	new->sortedtri = tri;
+	new = malloc(sizeof(t_listtri));
+	new->listtri = tri;
 	new->next = NULL;
 
 	if (!*list)
@@ -31,6 +31,43 @@ void	pushback(t_sortedtri **list, t_tri tri)
 		while (tmp->next)
 			tmp = tmp->next; 
 		tmp->next = new;
+	}
+}
+
+int		lstsize(t_listtri **list)
+{
+	t_listtri *tmp;
+	int		count;
+
+	count = 0;
+	if (!*list)
+		return (-1);
+	else
+	{
+		tmp = *list;
+		while (tmp->next)
+		{
+			tmp = tmp->next;
+			count++;
+		}
+	}
+	return (count);
+}
+
+void	deletefirst(t_listtri *lst)
+{
+	t_listtri	*todel;
+	
+	if (!lst)
+		return ;
+	else
+	{
+		//todel = lst;
+		//lst = lst->next;
+		lst = NULL;
+		free(lst);
+
+		//todel = NULL;
 	}
 }
 
@@ -83,7 +120,7 @@ int		main_loop(t_app *e)
 	vTarget = v_add(e->vcamera, e->vlookdir);
 	matCamera = m_pointAt(e->vcamera, vTarget, vUp);
 	matView = m_quickInverse(matCamera);
-	e->sortedtri = NULL;
+	e->listtri = NULL;
 	while (++i < 12)
 	{
 		t_projected[i] = malloc(sizeof(t_tri));
@@ -161,13 +198,14 @@ int		main_loop(t_app *e)
 				t_projected[i]->vert[2].y *= 0.5 * HEIGHT;
 				n++;
 			}
-			pushback(&e->sortedtri, *t_projected[i]);
+			pushback(&e->listtri, *t_projected[i]);
 			//triangle(e, t_projected[i]->vert[0], t_projected[i]->vert[1],t_projected[i]->vert[2], (t_rgba){255,0,0,0});
 			//drawtriangle(e, t_projected[i]);
 			n = 0;
 		}
 	}
-	drawtriangle(e, e->sortedtri);
+	//drawtriangle(e, e->listtri);
+	draw(e, e->listtri);
 	i = -1;
 	//patate(e);
 	//ft_putstr("player sector: ");
@@ -200,17 +238,73 @@ int		main_loop(t_app *e)
 	} 
 }
 
-int		drawtriangle(t_app *e, t_sortedtri *s)
+int		draw(t_app *e, t_listtri *s)
 {
-	t_sortedtri *tmp = s;
+	t_listtri *tmp = s;
+	
+	if (!s)
+		return (0);
+	while (tmp)
+	{
+		t_tri	clipped[2];
+		t_listtri *listtri = NULL;
+
+		listtri = s;
+		int	newtri = 1;
+		int	p = -1;
+		while (++p < 4)
+		{
+			int		tritoadd = 0;
+			while (newtri > 0)
+			{
+				//printf("\nfirst :%f\n", listtri->listtri.vert[0].x);
+				t_tri first = listtri->listtri;
+				t_listtri *tmp666;
+				tmp666 = listtri;
+				deletefirst(tmp666);
+				newtri--;
+
+				if (p == 0)
+					tritoadd = t_clipplane((t_vertex){ 0.0, 0.0, 0.0, 0.0 }, (t_vertex){ 0.0, 1.0, 0.0, 0.0 }, first, &clipped[0], &clipped[1]);break;
+				if (p == 1)
+					tritoadd = t_clipplane((t_vertex){ 0.0, (double)HEIGHT -1, 0.0, 0.0}, (t_vertex){ 0.0, -1.0, 0.0, 0.0 }, first, &clipped[0], &clipped[1]);break;
+				if (p == 2)
+					tritoadd = t_clipplane((t_vertex){ 0.0, 0.0, 0.0, 0.0}, (t_vertex){ 1.0, 0.0, 0.0, 0.0}, first, &clipped[0], &clipped[1]);break;
+				if (p == 3)
+					tritoadd = t_clipplane((t_vertex){ (double)WIDTH - 1, 0.0, 0.0, 0.0}, (t_vertex){ -1.0, 0.0, 0.0, 0.0}, first, &clipped[0], &clipped[1]);break;
+				int w = -1;
+				while (++w < tritoadd)
+				{
+					pushback(&listtri, clipped[w]);
+				}
+			}
+			newtri = lstsize(&listtri);
+		}
+		t_listtri *t;
+		t = listtri;
+		while (t)
+		{
+			_trace(e, t->listtri.vert[0].x, t->listtri.vert[0].y, t->listtri.vert[1].x, t->listtri.vert[1].y, (t_rgba){255, 255, 255 ,0});
+			_trace(e, t->listtri.vert[1].x, t->listtri.vert[1].y, t->listtri.vert[2].x, t->listtri.vert[2].y, (t_rgba){255, 255, 255 ,0});
+			_trace(e, t->listtri.vert[2].x, t->listtri.vert[2].y, t->listtri.vert[0].x, t->listtri.vert[0].y, (t_rgba){255, 255, 255 ,0});
+			t = t->next;
+		}
+		tmp = tmp->next;
+	}
+	return (1);
+}
+
+int		drawtriangle(t_app *e, t_listtri *s)
+{
+	t_listtri *tmp = s;
 	
 	if (!tmp)
 		return (0);
 	while (tmp)
 	{
-		_trace(e, tmp->sortedtri.vert[0].x, tmp->sortedtri.vert[0].y, tmp->sortedtri.vert[1].x, tmp->sortedtri.vert[1].y, (t_rgba){255, 255, 255 ,0});
-		_trace(e, tmp->sortedtri.vert[1].x, tmp->sortedtri.vert[1].y, tmp->sortedtri.vert[2].x, tmp->sortedtri.vert[2].y, (t_rgba){255, 255, 255 ,0});
-		_trace(e, tmp->sortedtri.vert[2].x, tmp->sortedtri.vert[2].y, tmp->sortedtri.vert[0].x, tmp->sortedtri.vert[0].y, (t_rgba){255, 255, 255 ,0});
+		_trace(e, tmp->listtri.vert[0].x, tmp->listtri.vert[0].y, tmp->listtri.vert[1].x, tmp->listtri.vert[1].y, (t_rgba){255, 255, 255 ,0});
+		_trace(e, tmp->listtri.vert[1].x, tmp->listtri.vert[1].y, tmp->listtri.vert[2].x, tmp->listtri.vert[2].y, (t_rgba){255, 255, 255 ,0});
+		_trace(e, tmp->listtri.vert[2].x, tmp->listtri.vert[2].y, tmp->listtri.vert[0].x, tmp->listtri.vert[0].y, (t_rgba){255, 255, 255 ,0});
 		tmp = tmp->next;
 	}
 	return (1);

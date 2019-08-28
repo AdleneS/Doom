@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/08/28 14:50:39 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/08/28 16:40:16 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -46,12 +46,12 @@ typedef struct			s_matrix
 	double				m[4][4];
 }						t_matrix;
 
-typedef struct			s_sortedtri
+typedef struct			s_listtri
 {	
-	t_tri				sortedtri;
-	struct s_sortedtri	*next;
+	t_tri				listtri;
+	struct s_listtri	*next;
 
-}						t_sortedtri;
+}						t_listtri;
 
 typedef struct			s_mlx
 {
@@ -101,7 +101,7 @@ typedef struct			s_app
 	struct s_input		*input;
 	struct sector		**sector;
 	struct s_mlx		**tex;
-	struct s_sortedtri	*sortedtri;
+	struct s_listtri	*listtri;
 	struct s_vertex		vcamera;
 	struct s_vertex		vlookdir;
 	struct s_vertex		v_camray;
