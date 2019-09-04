@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:27:54 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/08/28 16:40:16 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/09/02 17:34:55 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -22,6 +22,12 @@ typedef struct			s_rgba
 	int					a;
 }						t_rgba;
 
+typedef struct			s_vec2d
+{	
+	double				u;
+	double				v;
+}						t_vec2d;
+
 
 typedef struct			s_vertex
 {	
@@ -34,6 +40,7 @@ typedef struct			s_vertex
 typedef struct			s_tri
 {
 	t_vertex			vert[3];
+	t_vec2d				t[3];
 }						t_tri;
 
 typedef struct			s_mesh

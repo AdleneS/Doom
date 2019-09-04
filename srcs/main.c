@@ -6,13 +6,206 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/04/04 12:11:07 by slopez       #+#   ##    ##    #+#       */
-/*   Updated: 2019/08/28 19:09:54 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/09/04 15:06:40 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
 
 #include "../includes/doom.h"
 #include <stdio.h>
+
+t_rgba	ft_get_pixel(t_mlx img, int x, int y)
+{
+	t_rgba	rgb;
+	int		t;
+
+	if (x < 0 || y < 0 || x >=  384|| y >= 384)
+		return ((t_rgba){0, 0, 0, 0});
+	t = y * img.size + x * 4;
+	rgb.b = img.imgdata[t] + (img.imgdata[t] < 0 ? 256 : 0);
+	rgb.g = img.imgdata[t + 1] + (img.imgdata[t + 1] < 0 ? 256 : 0);
+	rgb.r = img.imgdata[t + 2] + (img.imgdata[t + 2] < 0 ? 256 : 0);
+	rgb.a = img.imgdata[t + 3] + (img.imgdata[t + 3] < 0 ? 256 : 0);
+	return (rgb);
+}
+
+void	swap(t_vertex *a, t_vertex *b)
+{
+	t_vertex c = *a;
+	*a = *b;
+	*b = c;
+}
+void	swap_int(int *a, int *b)
+{
+	int c = *a;
+	*a = *b;
+	*b = c;
+}
+void	swap_double(double *a, double *b)
+{
+	double c = *a;
+	*a = *b;
+	*b = c;
+}
+
+void	textured_triangle(t_app *e, int x1, int y1, double u1, double v1,
+		int x2, int y2, double u2, double v2,
+		int x3, int y3, double u3, double v3, t_mlx tex)
+{
+	if (y2 < y1)
+	{
+		swap_int(&y1, &y2);
+		swap_int(&x1, &x2);
+		swap_double(&u1, &u2);
+		swap_double(&v1, &v2);
+	}
+	if (y3 < y1)
+	{
+		swap_int(&y1, &y3);
+		swap_int(&x1, &x3);
+		swap_double(&u1, &u3);
+		swap_double(&v1, &v3);
+	}
+	if (y3 < y2)
+	{
+		swap_int(&y2, &y3);
+		swap_int(&x2, &x3);
+		swap_double(&u2, &u3);
+		swap_double(&v2, &v3);
+	}
+
+	int		dy1;
+	int		dx1;
+	int		dy2;
+	int		dx2;
+	double	dv1;
+	double	du1;
+	double	dv2;
+	double	du2;
+	double	dax_step;
+	double	dbx_step;
+	double	du1_step;
+	double	dv1_step;
+	double	du2_step;
+	double	dv2_step;
+	double	tex_u;
+	double	tex_v;
+
+	dy1 = y2 - y1;
+	dx1 = x2 - x1;
+	dv1 = v2 - v1;
+	du1 = u2 - u1;
+	dy2 = y3 - y1;
+	dx2 = x3 - x1;
+	dv2 = v3 - v1;
+	du2 = u3 - u1;
+	dax_step = 0;
+	dbx_step = 0;
+	du1_step = 0;
+	dv1_step = 0;
+	du2_step = 0;
+	dv2_step = 0;
+
+	if (dy1) dax_step = dx1 / (double)abs(dy1);
+	if (dy2) dbx_step = dx2 / (double)abs(dy2);
+
+	if (dy1) du1_step = du1 / (double)abs(dy1);
+	if (dy1) dv1_step = dv1 / (double)abs(dy1);
+
+	if (dy2) du2_step = du2 / (double)abs(dy2);
+	if (dy2) dv2_step = dv2 / (double)abs(dy2);
+
+	if (dy1)
+	{
+		int i;
+		i = y1;
+		while (i <= y2)
+		{
+			int	ax = x1 + (double)(i - y1) * dax_step;
+			int	bx = x1 + (double)(i - y1) * dbx_step;
+
+			double	tex_su = u1 + (double)(i - y1) * du1_step;
+			double	tex_sv = v1 + (double)(i - y1) * dv1_step;
+
+			double	tex_eu = u1 + (double)(i - y1) * du2_step;
+			double	tex_ev = v1 + (double)(i - y1) * dv2_step;
+
+			if (ax > bx)
+			{
+				swap_int(&ax, &bx);
+				swap_double(&tex_su, &tex_eu);
+				swap_double(&tex_sv, &tex_ev);
+			}
+
+			tex_u = tex_su;
+			tex_v = tex_sv;
+
+			double tstep = 1.0f / ((double)(bx - ax));
+			double t = 0.0f;
+			int	j = ax;
+			while (j < bx)
+			{
+				tex_u = (1.0f - t) * tex_su + t * tex_eu;
+				tex_v = (1.0f - t) * tex_sv + t * tex_ev;
+				lmlx_putpixel(e, j, i, ft_get_pixel(*e->tex[0], tex_u * 384.0, tex_v * 384.0 - 1.0f));
+				t += tstep;
+				j++;
+			}
+			i++;
+		}
+	}
+
+		dy1 = y3 - y2;
+		dx1 = x3 - x2;
+		dv1 = v3 - v2;
+		du1 = u3 - u2;
+
+		if (dy1) dax_step = dx1 / (double)abs(dy1);
+		if (dy2) dbx_step = dx2 / (double)abs(dy2);
+
+		du1_step = 0.f;
+		dv1_step = 0.f;
+		if (dy1) du1_step = du1 / (double)abs(dy1);
+		if (dy1) dv1_step = dv2 / (double)abs(dy1);
+		if (dy1)
+		{
+			int i = y2;
+			while (i <= y3)
+			{
+				int	ax = x2 + (double)(i - y2) * dax_step;
+				int	bx = x1 + (double)(i - y1) * dbx_step;
+
+				double	tex_su = u2 + (double)(i - y2) * du1_step;
+				double	tex_sv = v2 + (double)(i - y2) * dv1_step;
+
+				double	tex_eu = u1 + (double)(i - y1) * du2_step;
+				double	tex_ev = v1 + (double)(i - y1) * dv2_step;
+
+				if (ax > bx)
+				{
+					swap_int(&ax, &bx);
+					swap_double(&tex_su, &tex_eu);
+					swap_double(&tex_sv, &tex_ev);
+				}
+
+				tex_u = tex_su;
+				tex_v = tex_sv;
+
+				double tstep = 1.0f / ((double)(bx - ax));
+				double t = 0.0f;
+				int	j = ax;
+				while (j < bx)
+				{
+					tex_u = (1.0f - t) * tex_su + t * tex_eu;
+					tex_v = (1.0f - t) * tex_sv + t * tex_ev;
+					lmlx_putpixel(e, j, i, ft_get_pixel(*e->tex[0], tex_u * 384.0, tex_v * 384.0 - 1.0f));
+					t += tstep;
+					j++;
+				}
+				i++;
+			}
+		}
+}
 
 void	pushback(t_listtri **list, t_tri tri)
 {
@@ -71,12 +264,6 @@ void	deletefirst(t_listtri *lst)
 	}
 }
 
-void	swap(t_vertex *a, t_vertex *b)
-{
-	t_vertex c = *a;
-	*a = *b;
-	*b = c;
-}
 
 int		main_loop(t_app *e)
 {	
@@ -130,6 +317,9 @@ int		main_loop(t_app *e)
 		t_transformed[i]->vert[0] = matrix_mulvector(e->m_world, e->mesh->tri[i].vert[0]);
 		t_transformed[i]->vert[1] = matrix_mulvector(e->m_world, e->mesh->tri[i].vert[1]);
 		t_transformed[i]->vert[2] = matrix_mulvector(e->m_world, e->mesh->tri[i].vert[2]);
+		t_transformed[i]->t[0] = e->mesh->tri[i].t[0];
+		t_transformed[i]->t[1] = e->mesh->tri[i].t[1];
+		t_transformed[i]->t[2] = e->mesh->tri[i].t[2];
 
 		t_vertex normal;
 		t_vertex line1;
@@ -154,16 +344,21 @@ int		main_loop(t_app *e)
 			t_viewed[i]->vert[0] = matrix_mulvector(matView, t_transformed[i]->vert[0]);
 			t_viewed[i]->vert[1] = matrix_mulvector(matView, t_transformed[i]->vert[1]);
 			t_viewed[i]->vert[2] = matrix_mulvector(matView, t_transformed[i]->vert[2]);
-
+			t_viewed[i]->t[0] = t_transformed[i]->t[0];
+			t_viewed[i]->t[1] = t_transformed[i]->t[1];
+			t_viewed[i]->t[2] = t_transformed[i]->t[2];
 			int nclippedtriangles = 0;
 			t_tri clipped[2];
 			nclippedtriangles = t_clipplane((t_vertex){0.0, 0.0, 0.1, 1.0}, (t_vertex){0.0, 0.0, 1.0, 1.0}, *t_viewed[i], &clipped[0], &clipped[1]);
-				
+			
 			while (n < nclippedtriangles)
 			{
 				t_projected[i]->vert[0] = matrix_mulvector(e->matProj, clipped[n].vert[0]);
 				t_projected[i]->vert[1] = matrix_mulvector(e->matProj, clipped[n].vert[1]);
 				t_projected[i]->vert[2] = matrix_mulvector(e->matProj, clipped[n].vert[2]);
+				t_projected[i]->t[0] = clipped[n].t[0];
+				t_projected[i]->t[1] = clipped[n].t[1];
+				t_projected[i]->t[2] = clipped[n].t[2];
 				//t_projected[i]->vert[0] = matrix_mulvector(e->matProj, t_viewed[i]->vert[0]);
 				//t_projected[i]->vert[1] = matrix_mulvector(e->matProj, t_viewed[i]->vert[1]);
 				//t_projected[i]->vert[2] = matrix_mulvector(e->matProj, t_viewed[i]->vert[2]);
@@ -197,15 +392,15 @@ int		main_loop(t_app *e)
 				t_projected[i]->vert[2].x *= 0.5 * WIDTH;
 				t_projected[i]->vert[2].y *= 0.5 * HEIGHT;
 				n++;
+				pushback(&e->listtri, *t_projected[i]);
 			}
-			pushback(&e->listtri, *t_projected[i]);
-			//triangle(e, t_projected[i]->vert[0], t_projected[i]->vert[1],t_projected[i]->vert[2], (t_rgba){255,0,0,0});
 			//drawtriangle(e, t_projected[i]);
+			//triangle(e, t_projected[i]->vert[0], t_projected[i]->vert[1],t_projected[i]->vert[2], (t_rgba){255,0,0,0});
 			n = 0;
 		}
 	}
-	//drawtriangle(e, e->listtri);
 	draw(e, e->listtri);
+	//drawtriangle(e, e->listtri);
 	i = -1;
 	//patate(e);
 	//ft_putstr("player sector: ");
@@ -265,13 +460,13 @@ int		draw(t_app *e, t_listtri *s)
 				newtri--;
 
 				if (p == 0)
-					tritoadd = t_clipplane((t_vertex){ 0.0, 0.0, 0.0, 0.0 }, (t_vertex){ 0.0, 1.0, 0.0, 0.0 }, first, &clipped[0], &clipped[1]);break;
+					tritoadd = t_clipplane((t_vertex){ 0.0, 0.0, 0.0, 1.0 }, (t_vertex){ 0.0, 1.0, 0.0, 1.0 }, first, &clipped[0], &clipped[1]);break;
 				if (p == 1)
-					tritoadd = t_clipplane((t_vertex){ 0.0, (double)HEIGHT -1, 0.0, 0.0}, (t_vertex){ 0.0, -1.0, 0.0, 0.0 }, first, &clipped[0], &clipped[1]);break;
+					tritoadd = t_clipplane((t_vertex){ 0.0, (double)HEIGHT -1, 0.0, 1.0}, (t_vertex){ 0.0, -1.0, 0.0, 1.0 }, first, &clipped[0], &clipped[1]);break;
 				if (p == 2)
-					tritoadd = t_clipplane((t_vertex){ 0.0, 0.0, 0.0, 0.0}, (t_vertex){ 1.0, 0.0, 0.0, 0.0}, first, &clipped[0], &clipped[1]);break;
+					tritoadd = t_clipplane((t_vertex){ 0.0, 0.0, 0.0, 1.0}, (t_vertex){ 1.0, 0.0, 0.0, 1.0}, first, &clipped[0], &clipped[1]);break;
 				if (p == 3)
-					tritoadd = t_clipplane((t_vertex){ (double)WIDTH - 1, 0.0, 0.0, 0.0}, (t_vertex){ -1.0, 0.0, 0.0, 0.0}, first, &clipped[0], &clipped[1]);break;
+					tritoadd = t_clipplane((t_vertex){ (double)WIDTH - 1, 0.0, 0.0, 1.0}, (t_vertex){ -1.0, 0.0, 0.0, 1.0}, first, &clipped[0], &clipped[1]);break;
 				int w = -1;
 				while (++w < tritoadd)
 				{
@@ -284,9 +479,14 @@ int		draw(t_app *e, t_listtri *s)
 		t = listtri;
 		while (t)
 		{
-			_trace(e, t->listtri.vert[0].x, t->listtri.vert[0].y, t->listtri.vert[1].x, t->listtri.vert[1].y, (t_rgba){255, 255, 255 ,0});
-			_trace(e, t->listtri.vert[1].x, t->listtri.vert[1].y, t->listtri.vert[2].x, t->listtri.vert[2].y, (t_rgba){255, 255, 255 ,0});
-			_trace(e, t->listtri.vert[2].x, t->listtri.vert[2].y, t->listtri.vert[0].x, t->listtri.vert[0].y, (t_rgba){255, 255, 255 ,0});
+			//triangle(e, t->listtri.vert[0], t->listtri.vert[1],t->listtri.vert[2], (t_rgba){90,0,200,0});
+			//_trace(e, t->listtri.vert[0].x, t->listtri.vert[0].y, t->listtri.vert[1].x, t->listtri.vert[1].y, (t_rgba){255, 255, 255 ,0});
+			//_trace(e, t->listtri.vert[1].x, t->listtri.vert[1].y, t->listtri.vert[2].x, t->listtri.vert[2].y, (t_rgba){255, 255, 255 ,0});
+			//_trace(e, t->listtri.vert[2].x, t->listtri.vert[2].y, t->listtri.vert[0].x, t->listtri.vert[0].y, (t_rgba){255, 255, 255 ,0});
+			textured_triangle(e, t->listtri.vert[0].x, t->listtri.vert[0].y, t->listtri.t[0].u, t->listtri.t[0].v,
+			t->listtri.vert[1].x, t->listtri.vert[1].y, t->listtri.t[1].u, t->listtri.t[1].v,
+			t->listtri.vert[2].x, t->listtri.vert[2].y, t->listtri.t[2].u, t->listtri.t[2].v, *e->tex[0]);
+			drawtriangle(e, t);
 			t = t->next;
 		}
 		tmp = tmp->next;
@@ -358,8 +558,8 @@ static void	load_texture_from_file(t_app *e, int i, char *file)
 	//	ft_putstr(" : ");
 	//	exitandfree(e, "file not found", 2);
 	//}
-	w = 64;
-	h = 64;
+	w = 384;
+	h = 384;
 	e->tex[i]->img = mlx_xpm_file_to_image(e->mlx.ptr, file, &w, &h);
 	e->tex[i]->imgdata = mlx_get_data_addr(e->tex[i]->img,
 				&e->tex[i]->bpp, &e->tex[i]->size, &e->tex[i]->endian);
@@ -372,10 +572,11 @@ void		load_textures(t_app *e)
 
 	nbtex = 2;
 	//e->sp = (t_mlx **)malloc(sizeof(t_mlx *) * 2);
+	e->tex = (t_mlx **)malloc(sizeof(t_mlx *));
 	i = -1;
-	while (++i < nbtex)
-		e->tex[i] = malloc(sizeof(t_mlx));
-	load_texture_from_file(e, 0, "/Users/asaba/ProjectClean/DebugDoom/barrel.xpm");
+	while (++i < 1)
+		e->tex[i] = (t_mlx *)malloc(sizeof(t_mlx));
+	load_texture_from_file(e, 0, "/Users/asaba/ProjectClean/Doom3/wall.xpm");
 }
 
 
@@ -390,7 +591,7 @@ int		main(int argc, char *argv[])
 	main_init(e);
 	createcube(e);
 	lmlx_init(e);
-	//load_textures(e);
+	load_textures(e);
 	lmlx_loop(e);
 	return (0);
 }

@@ -6,7 +6,7 @@
 /*   By: asaba <asaba@student.le-101.fr>            +:+   +:    +:    +:+     */
 /*                                                 #+#   #+    #+    #+#      */
 /*   Created: 2019/07/22 18:09:41 by asaba        #+#   ##    ##    #+#       */
-/*   Updated: 2019/08/28 16:02:18 by asaba       ###    #+. /#+    ###.fr     */
+/*   Updated: 2019/09/04 14:03:37 by asaba       ###    #+. /#+    ###.fr     */
 /*                                                         /                  */
 /*                                                        /                   */
 /* ************************************************************************** */
@@ -59,17 +59,17 @@ t_vertex		v_crossprod(t_vertex v1, t_vertex v2)
 	return (v);
 }
 
-t_vertex		v_intersectplane(t_vertex plane_p, t_vertex plane_n, t_vertex linestart, t_vertex lineend)
+t_vertex		v_intersectplane(t_vertex plane_p, t_vertex plane_n, t_vertex linestart, t_vertex lineend, double *t)
 {
 	plane_n = v_normalize(plane_n);
 	double plane_d = -v_dotproduct(plane_n, plane_p);
 	double ad = v_dotproduct(linestart, plane_n);
 	double bd = v_dotproduct(lineend, plane_n);
-	double t = (-plane_d - ad) / (bd - ad);
+	*t = (-plane_d - ad) / (bd - ad);
 	t_vertex linestarttoEnd = (t_vertex){0,0,0,1};
 	t_vertex linetointersect = (t_vertex){0,0,0,1};
 	linestarttoEnd = v_sub(lineend, linestart);
-	linetointersect = v_mul(linestarttoEnd, t);
+	linetointersect = v_mul(linestarttoEnd, *t);
 	return v_add(linestart, linetointersect);
 }
 
@@ -83,26 +83,33 @@ int			t_clipplane(t_vertex plane_p, t_vertex plane_n, t_tri in_tri, t_tri *out_t
 {
 	t_vertex	inside_points[3];
 	t_vertex	outside_points[3];
+	t_vec2d		inside_tex[3];
+	t_vec2d		outside_tex[3];
 	int			n_insidepointcount;
 	int			n_outsidepointcount;
+	int			n_outside_tex_count;
+	int			n_intside_tex_count;
 	double		d0;
 	double		d1;
 	double		d2;
 	plane_n = v_normalize(plane_n);
 	n_insidepointcount = 0;
 	n_outsidepointcount = 0;
+	n_intside_tex_count = 0;
+	n_outside_tex_count = 0;
+
 	d0 = t_distance(in_tri.vert[0], plane_n, plane_p);
 	d1 = t_distance(in_tri.vert[1], plane_n, plane_p);
 	d2 = t_distance(in_tri.vert[2], plane_n, plane_p);
-	if (d0 >=0) inside_points[n_insidepointcount++] = in_tri.vert[0];
-	else outside_points[n_outsidepointcount++] = in_tri.vert[0];
-	if (d1 >=0) inside_points[n_insidepointcount++] = in_tri.vert[1];
-	else outside_points[n_outsidepointcount++] = in_tri.vert[1];
-	if (d2 >=0) inside_points[n_insidepointcount++] = in_tri.vert[2];
-	else outside_points[n_outsidepointcount++] = in_tri.vert[2];
+	if (d0 >=0) {inside_points[n_insidepointcount++] = in_tri.vert[0]; inside_tex[n_intside_tex_count++] = in_tri.t[0];}
+	else {outside_points[n_outsidepointcount++] = in_tri.vert[0]; outside_tex[n_outside_tex_count++] = in_tri.t[0];}
+	if (d1 >=0) {inside_points[n_insidepointcount++] = in_tri.vert[1];in_tri.vert[1]; inside_tex[n_intside_tex_count++] = in_tri.t[1];}
+	else {outside_points[n_outsidepointcount++] = in_tri.vert[1]; outside_tex[n_outside_tex_count++] = in_tri.t[1];}
+	if (d2 >=0) {inside_points[n_insidepointcount++] = in_tri.vert[2]; inside_tex[n_intside_tex_count++] = in_tri.t[2];}
+	else {outside_points[n_outsidepointcount++] = in_tri.vert[2]; outside_tex[n_outside_tex_count++] = in_tri.t[2];}
 
-	printf("\nInside : %d\n", n_insidepointcount);
-	printf("Outstide : %d\n", n_outsidepointcount);
+	//printf("\nInside : %d\n", n_insidepointcount);
+	//printf("Outstide : %d\n", n_outsidepointcount);
 
 	if (n_insidepointcount == 0)
 	{
@@ -115,20 +122,37 @@ int			t_clipplane(t_vertex plane_p, t_vertex plane_n, t_tri in_tri, t_tri *out_t
 	}
 	if (n_insidepointcount == 1 && n_outsidepointcount == 2)
 	{
+		double t;
 		out_tri1->vert[0] = inside_points[0];
-		out_tri1->vert[1] = v_intersectplane(plane_p, plane_n, inside_points[0], outside_points[0]);
-		out_tri1->vert[2] = v_intersectplane(plane_p, plane_n, inside_points[0], outside_points[1]);
+		out_tri1->t[0] = inside_tex[0];
+		
+		out_tri1->vert[1] = v_intersectplane(plane_p, plane_n, inside_points[0], outside_points[0], &t);
+		out_tri1->t[1].u = t * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
+		out_tri1->t[1].v = t * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
+		out_tri1->vert[2] = v_intersectplane(plane_p, plane_n, inside_points[0], outside_points[1], &t);
+		out_tri1->t[2].u = t * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
+		out_tri1->t[2].v = t * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
 		return (1);
 	}
 	if (n_insidepointcount == 2 && n_outsidepointcount == 1)
 	{
 		out_tri1->vert[0] = inside_points[0];
 		out_tri1->vert[1] = inside_points[1];
-		out_tri1->vert[2] = v_intersectplane(plane_p, plane_n, inside_points[0], outside_points[0]);
-		
+		out_tri1->t[0] = inside_tex[0];
+		out_tri1->t[1] = inside_tex[1];
+
+		double t;
+		out_tri1->vert[2] = v_intersectplane(plane_p, plane_n, inside_points[0], outside_points[0], &t);
+		out_tri1->t[2].u = t * (outside_tex[0].u - inside_tex[0].u) + inside_tex[0].u;
+		out_tri1->t[2].v = t * (outside_tex[0].v - inside_tex[0].v) + inside_tex[0].v;
+
 		out_tri2->vert[0] = inside_points[1];
+		out_tri2->t[0] = inside_tex[1];
 		out_tri2->vert[1] = out_tri1->vert[2];
-		out_tri2->vert[2] = v_intersectplane(plane_p, plane_n, inside_points[1], outside_points[0]);
+		out_tri2->t[1] = out_tri1->t[2];
+		out_tri2->vert[2] = v_intersectplane(plane_p, plane_n, inside_points[1], outside_points[0], &t);
+		out_tri2->t[2].u = t * (outside_tex[0].u - inside_tex[1].u) + inside_tex[1].u;
+		out_tri2->t[2].v = t * (outside_tex[0].v - inside_tex[1].v) + inside_tex[1].v;
 		return (2);
 	}
 	return (0);
